@@ -1,0 +1,8 @@
+services:
+  master:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.master
+    container_name: gridmr_master
+    ports:
+      - "8000:8000"
