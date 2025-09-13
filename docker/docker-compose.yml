@@ -3,6 +3,32 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.master
+    image: gridmr_master:latest
     container_name: gridmr_master
     ports:
       - "8000:8000"
+    depends_on:
+      - worker1
+      - worker2
+
+  worker1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: gridmr_worker:latest
+    container_name: gridmr_worker1
+    environment:
+      - WORKER_NAME=worker1
+    ports:
+      - "8001:8001"
+
+  worker2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: gridmr_worker:latest
+    container_name: gridmr_worker2
+    environment:
+      - WORKER_NAME=worker2
+    ports:
+      - "8002:8001"
