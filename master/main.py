@@ -4,6 +4,8 @@ from typing import Dict, Optional, List
 from collections import Counter
 import re, uuid, time, asyncio
 import httpx
+import os
+
 
 app = FastAPI(title="GridMR Master", version="0.5")
 
@@ -13,11 +15,14 @@ REQUEST_TIMEOUT = 10.0        # segundos por request
 RETRY_BACKOFF = 0.5           # backoff base (exponencial): 0.5s, 1s, 2s...
 MAX_INFLIGHT = 16             # límite de MAPs simultáneos (throttle)
 
-# Lista de workers (en Docker Compose se resuelven por nombre de servicio)
-WORKERS: List[str] = [
-    "http://worker1:8001",
-    "http://worker2:8001",
-]
+def _load_workers_from_env() -> List[str]:
+    raw = os.getenv("WORKERS", "")
+    items = [x.strip() for x in raw.split(",") if x.strip()]
+    # fallback si no hay ENV (compose local)
+    return items or ["http://worker1:8001", "http://worker2:8001"]
+
+WORKERS: List[str] = _load_workers_from_env()
+
 
 # Estado por worker: fallas acumuladas y cooldown
 WORKER_STATE: Dict[str, Dict[str, float]] = {
