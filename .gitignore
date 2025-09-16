@@ -1,7 +1,22 @@
-.venv/
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.sqlite3
+*.db
+.venv/
+
+# Data & logs
+data/
+logs/
 *.log
+
+# Docker
+*.env
+.env.*
+# mac/win/editor
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
