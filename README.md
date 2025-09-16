@@ -4,7 +4,7 @@ Sistema de procesamiento distribuido tipo **MapReduce** con arquitectura **Maest
 
 ---
 
-## 🗂️ Estructura del repositorio
+## Estructura del repositorio
 
 ```
 Grid-MR-feat-master-mvp/
@@ -24,7 +24,7 @@ Grid-MR-feat-master-mvp/
 
 ---
 
-## 🧭 Arquitectura y flujo
+## Arquitectura y flujo
 
 **Estilo**: Maestro–Workers (HTTP/REST + JSON).
 **Resolución de servicios**: en Compose, el Master alcanza a los Workers por **nombre** (`worker1`, `worker2`).
@@ -56,7 +56,7 @@ Cliente           Master                            Workers
 
 ---
 
-## ⚙️ Requisitos
+## Requisitos
 
 * **Docker** y **Docker Compose**.
 * Windows 11: **Docker Desktop** + **WSL2** activo.
@@ -64,7 +64,7 @@ Cliente           Master                            Workers
 
 ---
 
-## 🚀 Puesta en marcha (local con Docker)
+## Puesta en marcha (local con Docker)
 
 Desde `docker/`:
 
@@ -97,7 +97,7 @@ curl http://localhost:8002/
 
 ---
 
-## 🧪 Pruebas rápidas
+## Pruebas rápidas
 
 ### A) WordCount (texto en crudo)
 
@@ -135,7 +135,7 @@ jq -Rs --argjson split 2000 '{input_text: ., split_size: $split}' docker/big.txt
 
 ---
 
-## 🔌 API de referencia (MVP)
+## API de referencia (MVP)
 
 ### Master
 
@@ -196,7 +196,7 @@ jq -Rs --argjson split 2000 '{input_text: ., split_size: $split}' docker/big.txt
 
 ---
 
-## 🔧 Configuración
+## Configuración
 
 ### Variables de entorno
 
@@ -216,7 +216,7 @@ jq -Rs --argjson split 2000 '{input_text: ., split_size: $split}' docker/big.txt
 
 ---
 
-## 🐞 Troubleshooting
+## Troubleshooting
 
 * **“port is already allocated”** → cambia puertos en `docker/docker-compose.yml` o libera el puerto.
 * **Cambios no se reflejan** → `docker compose down && docker compose build --no-cache && docker compose up -d`.
