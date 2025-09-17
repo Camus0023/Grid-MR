@@ -227,5 +227,73 @@ jq -Rs --argjson split 2000 '{input_text: ., split_size: $split}' docker/big.txt
 
 ## ☁️ Despliegue en AWS/EC2
 
-> **(Sección pendiente — se documentará posteriormente)**
+### Infra
+- 1x EC2 Ubuntu 22.04 (master), 3x EC2 (workers) `t3.micro`, 20 GiB gp3.
+- Security Group `gridmr-sg`:
+  - Inbound: SSH 22 → My IP; TCP 8000 → My IP; TCP 8000 → VPC CIDR; TCP 8001 → VPC CIDR.
+  - Outbound: All traffic (0.0.0.0/0).
+- Master con puerto 8000 público; workers solo trafican dentro de la VPC (8001).
 
+### Master (SSH)
+```bash
+sudo apt update && sudo apt install -y docker.io docker-compose git
+git clone -b Palacio --single-branch https://github.com/Camus0023/Grid-MR.git gridmr
+cd gridmr && sudo mkdir -p /srv/gridmr/master && sudo chown -R ubuntu:ubuntu /srv/gridmr/master
+cd docker
+docker-compose -f docker-compose.master.yml up -d --build
+# (opcional) mapear workers en /etc/hosts si el master muestra placeholders
+sudo bash -c 'cat >> /etc/hosts <<EOF
+172.31.X.1 worker1
+172.31.X.2 worker2
+172.31.X.3 worker3
+EOF'
+curl http://localhost:8000/workers
+```
+### Worker (SSH en cada uno; cambia WORKER_NAME y usa la IP privada del master)
+```bash
+sudo apt update && sudo apt install -y docker.io docker-compose git
+git clone -b Palacio --single-branch https://github.com/Camus0023/Grid-MR.git gridmr
+sudo mkdir -p /srv/gridmr/worker && sudo chown -R ubuntu:ubuntu /srv/gridmr/worker
+cd gridmr/docker
+MASTER_PRIV_IP="172.31.24.235"           # IP privada del master
+WORKER_NAME="worker1"                     # worker2 / worker3 en los otros
+WORKER_PRIV_IP=$(hostname -I | awk '{print $1}')
+cat > docker-compose.yml <<EOF
+services:
+  worker:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.worker
+    container_name: gridmr_${WORKER_NAME}
+    ports: ["8001:8001"]
+    environment:
+      - WORKER_NAME=${WORKER_NAME}
+      - MASTER_URL=http://${MASTER_PRIV_IP}:8000
+      - PUBLIC_URL=http://${WORKER_PRIV_IP}:8001
+      - CAPACITY=1
+      - HEARTBEAT_INTERVAL=5
+    volumes: ["/srv/gridmr/worker:/data"]
+    restart: unless-stopped
+EOF
+docker-compose up -d --build
+```
+### Prueba desde pc (Cliente)
+``` bash
+# Ver workers
+curl http://<IP_PUBLICA_MASTER>:8000/workers
+
+# Texto
+python client.py --master http://<IP_PUBLICA_MASTER>:8000 submit-text "hola hola mundo mundo mundo" --split 1024 --reducers 2
+
+# Archivo
+python client.py --master http://<IP_PUBLICA_MASTER>:8000 submit-file --job wordcount sample.txt --split 2048 --reducers 2
+
+# Status
+python client.py --master http://<IP_PUBLICA_MASTER>:8000 status <job_id|wordcount>
+```
+### Evidencia para la entrega
+<img width="1458" height="217" alt="image" src="https://github.com/user-attachments/assets/07c115a4-4ad6-4e64-a0a0-00a754d6f24b" />
+En esta imagen podemos ver que desde una terminal en un pc se ven los 3 workers,
+
+<img width="1150" height="381" alt="image" src="https://github.com/user-attachments/assets/2e90e5c0-5f80-415d-96b5-ffbde5722023" />
+En esta imagen se puede ver un job enviado y finalizado con exito.
