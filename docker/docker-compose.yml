@@ -1,0 +1,83 @@
+services:
+  master:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.master
+    image: gridmr_master:latest
+    container_name: gridmr_master
+    environment:
+      - MASTER_DATA_DIR=/data/master
+      - WORKER1_URL=http://worker1:8001
+      - WORKER2_URL=http://worker2:8001
+      - WORKER3_URL=http://worker3:8001
+      - DEFAULT_NUM_REDUCERS=2
+      - HEARTBEAT_INTERVAL=5
+      - HEARTBEAT_TTL=15
+    ports:
+      - "8000:8000"
+    volumes:
+      - master_data:/data/master
+    depends_on:
+      - worker1
+      - worker2
+      - worker3
+
+  worker1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: gridmr_worker:latest
+    container_name: gridmr_worker1
+    environment:
+      - WORKER_NAME=worker1
+      - WORKER_DATA_DIR=/data/worker
+      - CAPACITY=2
+      - MASTER_URL=http://master:8000
+      - PUBLIC_URL=http://worker1:8001
+      - HEARTBEAT_INTERVAL=5
+    ports:
+      - "8001:8001"
+    volumes:
+      - worker1_data:/data/worker
+
+  worker2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: gridmr_worker:latest
+    container_name: gridmr_worker2
+    environment:
+      - WORKER_NAME=worker2
+      - WORKER_DATA_DIR=/data/worker
+      - CAPACITY=1
+      - MASTER_URL=http://master:8000
+      - PUBLIC_URL=http://worker2:8001
+      - HEARTBEAT_INTERVAL=5
+    ports:
+      - "8002:8001"
+    volumes:
+      - worker2_data:/data/worker
+
+  worker3:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+    image: gridmr_worker:latest
+    container_name: gridmr_worker3
+    environment:
+      - WORKER_NAME=worker3
+      - WORKER_DATA_DIR=/data/worker
+      - CAPACITY=1
+      - MASTER_URL=http://master:8000
+      - PUBLIC_URL=http://worker3:8001
+      - HEARTBEAT_INTERVAL=5
+    ports:
+      - "8003:8001"
+    volumes:
+      - worker3_data:/data/worker
+
+volumes:
+  master_data:
+  worker1_data:
+  worker2_data:
+  worker3_data:
