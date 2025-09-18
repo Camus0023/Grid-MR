@@ -1,4 +1,5 @@
 # GridMR — MapReduce Distribuido (MVP)
+video: https://youtu.be/ZP81GxsNx7Y
 
 Sistema de procesamiento distribuido tipo **MapReduce** con arquitectura **Maestro–Workers** y comunicación **REST** (FastAPI). Este MVP ejecuta **WordCount** sobre texto enviado por el cliente, partiendo la entrada en *splits* y distribuyendo **Map** entre múltiples workers; el **Reduce** se intenta ejecutar en un worker disponible (con *fallback* local).
 
